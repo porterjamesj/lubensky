@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-# <nbformat>3.0</nbformat>
-
-# <codecell>
+#//
 
 #imports
 import numpy as np
@@ -10,7 +7,7 @@ from scipy.integrate import odeint
 from scipy.spatial import Delaunay
 import matplotlib.pyplot as plt
 
-# <codecell>
+#//
 
 #functions
 
@@ -84,7 +81,7 @@ def diff(conc_array, triang):
             val_array[pindex] += (1 / np.linalg.norm(triang.points[pindex] - triang.points[nindex])**2) * (conc_list[nindex] - conc_list[pindex])
     return np.reshape(val_array, np.shape(conc_array))
 
-# <codecell>
+#//
 
 #parameters. defined globally for now, there's probably a more 'best practices' way to do this but this is more syntactically terse so I'm leaving it like this for now
 #values taken from lubensky
@@ -117,8 +114,9 @@ nmol = 4
 xdim = 30
 ydim = 50
 
-# <codecell>
+#//
 
+#the function that computes the derivaties
 #inputs are levels of molecules (y) time (t), number of molecular players (n), and a triang with neighbor_indices
 def f(y, t, nmol, triang):
     c = np.reshape( y, [ nmol, xdim , ydim ]) #this reshapes the flat y array into three dimensions: molecule, x, and y. c for concentrations I guess.
@@ -147,12 +145,12 @@ def f(y, t, nmol, triang):
     
     return xprime.flatten() #have to flatten the output so that it can be input to the next iteration of the function
 
-# <codecell>
+#//
 
 distlattice = mk_rand_lattice(xdim,ydim) #set up the cells
 triang = package(distlattice) #triangulate
 
-# <codecell>
+#//
 
 args = (nmol, triang) #arguments to be passed to f
 initial = np.zeros((nmol,xdim,ydim))
@@ -163,26 +161,27 @@ timerange = range(0,500) #time to solve on
 plt.scatter(distlattice[1].flatten(), distlattice[0].flatten(), c = initial[0], vmin = 0, vmax = 2, s = 20)
 plt.colorbar()
 
-# <codecell>
+#//
 
 #solve it
 sol = odeint(f, initial.flatten(), timerange, args)
 
-# <codecell>
+#//
 
 resols = [np.reshape(i, [nmol,xdim,ydim]) for i in sol]
 #reshaping the solutions so that they are easy to plot and view.
 #resols is shaped like [time][molecule][x][y]
 resols[0][0] #this shows the values in all cells of molecule a (at index 0) at time 0
 
-# <codecell>
+#//
 
 #make a pretty plot of results, control the time point and molecule using 'c'
 plt.scatter(distlattice[1].flatten(), distlattice[0].flatten(), c = resols[499][0], vmin = 0, vmax = 1.5, s = 20)
 plt.axes().set_aspect('equal')
 plt.colorbar()
 
-# <codecell>
+#//
 
 np.save("rand_fail",resols) #can save the results to a file for later analysis
 
+#//

@@ -63,7 +63,7 @@ def find_neighbors(pindex, triang):
             this is a one liner for 'if this simplex contains the point we're interested in,
             extend the neighbors list by appending all the *other* point indices in the simplex
             '''
-    #now we just have to strip out all the duplicate indices and return the list of negihbors:
+    #Now we just have to strip out all the duplicate indices and return the list of negihbors:
     return list(set(neighbors))
 
 #packages up a lattice as a triang with neighbors indexed in triang.neighbor_indicies, which is a dictionary for fast lookup
@@ -114,8 +114,8 @@ Tu=2.0
 
 #use xdim and y dim to control the size of the rectangular grid that is solved for
 nmol = 4
-xdim = 10
-ydim = 15
+xdim = 13
+ydim = 50
 
 # <codecell>
 
@@ -156,35 +156,45 @@ triang = package(distlattice) #triangulate
 
 args = (nmol, triang) #arguments to be passed to f
 initial = np.zeros((nmol,xdim,ydim))
-initial[0,0:30:8,0:12:8] = 1.5 #set up initial conditions
-initial[0,4:30:8,4:12:8] = 1.5 #set up initial conditions
-initial[3,0:30,0:8] = 0.005
+initial[0,0:30:8,0:30:8] = 1.5 #set up initial conditions
+initial[0,4:30:8,4:30:8] = 1.5 #set up initial conditions
+initial[3,0:30,0:30] = 0.005
 timerange = range(0,150) #time to solve on
 #make a pretty plot of inital conditions
 plt.scatter(distlattice[1].flatten(), distlattice[0].flatten(), c = initial[0], vmin = 0, vmax = 2, s = 20)
 plt.axes().set_aspect('equal')
 plt.colorbar()
+plt.draw()
+plt.show()
+plt.ion()
 
-# <codecell>
-
+#
+plt.clf()
+# <Codecell|>
+        
 #solve it
 sol = odeint(f, initial.flatten(), timerange, args)
-
+print "done"
 # <codecell>
 
 resols = [np.reshape(i, [nmol,xdim,ydim]) for i in sol]
 #reshaping the solutions so that they are easy to plot and view.
 #resols is shaped like [time][molecule][x][y]
-resols[19][3] #this shows the values in all cells of molecule a (at index 0) at time 0
+#resols[19][3] #this shows the values in all cells of molecule a (at index 0) at time 0
 
 # <codecell>
-
 #make a pretty plot of results, control the time point and molecule using 'c'
-plt.scatter(distlattice[1].flatten(), distlattice[0].flatten(), c = resols[0][0], vmin = 0, vmax = 2, s = 50)
+plt.scatter(distlattice[1].flatten(), distlattice[0].flatten(), c = resols[45][0], vmin = 0, vmax = 1.7, s = 50)
 plt.axes().set_aspect('equal')
 plt.colorbar()
+plt.show()
+initial = resols[149]
+#
+plt.clf()
+#
 
-# <codecell>
+np.save("second-half-succes",resols) #can save the results to a file for later analysis
 
-np.save("success",resols) #can save the results to a file for later analysis
 
+#
+resols = np.load("/Users/james/Documents/research/code/dynamical/lubensky/success.npy")
