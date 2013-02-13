@@ -67,7 +67,7 @@ triang = package(distlattice) #triangulate
 
 #set up initial conditions
 initial = np.zeros((nmol,xdim,ydim))
-timerange = range(0,1000) #range to solve on
+timerange = range(0,149) #range to solve on
 #view initial conditions
 plt.clf()
 plt.scatter(distlattice[1].flatten(), distlattice[0].flatten(), c = initial[0], vmin = 0, vmax = 2, s = 50)
