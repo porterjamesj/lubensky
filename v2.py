@@ -16,13 +16,13 @@ import scipy as sp
 #parameter definitions
 #(will go here eventually)
 #egfr
-Ae = 2.2
-nae = 8.0
-De = 0.16
-Te = 2.0
+Ae,An = 0.2,0.2
+nae,nan = 8.0,8.0
+De,Dn = 1.0,1.0
+Te,Tn = 2.0,2.0
 #yan
-Uy = 1.0
-nuy = 2.0
+Ny = 0.005
+nny = 2.0
 Py = 1.0
 npy = 2.0
 Ay = 0.5
@@ -35,11 +35,12 @@ nyp = 4.0
 Ap = 0.5
 nap = 6.0
 
-lubensky = np.load("sims/half-success.npy")
+lubensky = np.load("sims/second-half-success.npy")
+lubensky = lubensky[:,:,:,15:]
 
-nmol = 3
+nmol = 4
 xdim = 13
-ydim = 50
+ydim = 35
 
 #//
 # note here that nmol does not include the molecules
@@ -51,24 +52,26 @@ def f(y, t, nmol, triang):
     xprime = np.empty(c.shape)
 
     e = c[0,:,:]
-    y = c[1,:,:]
-    p = c[2,:,:]
+    n = c[1,:,:]
+    y = c[2,:,:]
+    p = c[3,:,:]
 
     #get values for a and u from loaded lubensky results
     #print t
     a = lubensky[t][0]
-    u = lubensky[t][2]
 
     #actually calculate the rates of change
 
     #for 'egfr', the molecule at index [0,:,:]
-    xprime[0,:,:] = hill(a/Ae,1.0,nae) - e + De * diff(e,triang) / Te
+    xprime[0,:,:] = (hill(a/Ae,1.0,nae) - e + De * diff(e,triang)) / Te
+    #for 'notch', the molecule at index [1,:,:]
+    xprime[1,:,:] = (hill(a/An,1.0,nan) - n + Dn * diff(n,triang)) / Tn
     # for 'y', the molecule at index [1,:,:]
-    xprime[1,:,:] = hill(u/Uy,1.0,nuy) - y - hill(p/Py,1.0,npy) - hill(a/Ay,1.0,nay)
+    xprime[2,:,:] = hill(n/Ny,1.0,nny)*(1-hill(a/Ay,1.0,nay))-y
     # for 'p', the molecule at index [2,:,:]
-    xprime[2,:,:] = hill(e/Ep,1.0,nep) - p - hill(y/Yp,1.0,nyp) - hill(p/Ap,1.0,nap)
-    print type(xprime.flatten[0][0][0])
-    return xprime.flatten
+    xprime[3,:,:] = hill(e/Ep,1.0,nep)*(1-hill(a/Ap,1.0,nap))-p
+
+    return xprime.flatten()
 
 #//
 
@@ -79,7 +82,7 @@ triang = package(distlattice) #triangulate
 
 #set up initial conditions
 initial = np.zeros((nmol,xdim,ydim))
-timerange = range(0,140) #range to solve on
+timerange = range(0,10) #range to solve on
 #view initial conditions
 plt.clf()
 plt.scatter(distlattice[1].flatten(), distlattice[0].flatten(), c = initial[0], vmin = 0, vmax = 2, s = 50)
@@ -93,5 +96,16 @@ plt.savefig("fig")
 args = (nmol, triang)
 sol = odeint(f,initial.flatten(),timerange,args)
 print "done"
+
+resols = [np.reshape(i, [nmol,xdim,ydim]) for i in sol]
+
+#//
+
+#make a pretty plot of results, control the time point and molecule using 'c'
+plt.clf()
+plt.scatter(distlattice[1].flatten(), distlattice[0].flatten(), c = resols[9][0], vmin = 0, vmax = 1.5, s = 50)
+plt.axes().set_aspect('equal')
+plt.colorbar()
+plt.savefig("fig")
 
 #//
