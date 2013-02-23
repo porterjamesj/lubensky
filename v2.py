@@ -24,22 +24,22 @@ def shRange(conc_array, triang):
 #parameter definitions
 #(will go here eventually)
 #egfr/notch
-Ae,An = .0001,.0001
+Ae,An = .01,.01
 nae,nan = 4.0,4.0
 
 De,Dn = 1.0,1.0
-Te,Tn = 2.0,2.0
 
 Ee,Nn = 0.5,0.5
 nee,nnn = 2.0,2.0
 
 #yan
-Ny = 0.005
+Ny = 0.5
 nny = 2.0
 Py = 1.0
 npy = 2.0
 Ay = 0.5
 nay = 6.0
+
 #pnt
 Ep = 0.5
 nep = 4.0
@@ -76,9 +76,9 @@ def f(y, t, nmol, triang):
     #actually calculate the rates of change
 
     #for 'egfr', the molecule at index [0,:,:]
-    xprime[0,:,:] = (1.0-hill(a/Ae,1.0,nae)) * (hill(e/Ee,1.0,nee) + De*shRange(s,triang)/Te) - e + De*diff(e,triang)/Te
+    xprime[0,:,:] = (1.0-hill(a/Ae,1.0,nae)) * (hill(e/Ee,1.0,nee) + De*shRange(s,triang)) - e + De*diff(e,triang)
     #for 'notch', the molecule at index [1,:,:]
-    xprime[1,:,:] = (1.0-hill(a/Ae,1.0,nae)) * (hill(e/Ee,1.0,nee) + De*shRange(s,triang)/Te) - e + De*diff(e,triang)/Te
+    xprime[1,:,:] = (1.0-hill(a/An,1.0,nan)) * (hill(n/Nn,1.0,nnn) + Dn*shRange(s,triang)) - n + Dn*diff(n,triang)
     # for 'y', the molecule at index [1,:,:]
     xprime[2,:,:] = hill(n/Ny,1.0,nny)*(1-hill(a/Ay,1.0,nay))-y
     # for 'p', the molecule at index [2,:,:]
@@ -116,7 +116,7 @@ resols = [np.reshape(i, [nmol,xdim,ydim]) for i in sol]
 
 #make a pretty plot of results, control the time point and molecule using 'c'
 plt.clf()
-plt.scatter(distlattice[1].flatten(), distlattice[0].flatten(), c = resols[1][0], vmin = 0, vmax = 1.5, s = 50)
+plt.scatter(distlattice[1].flatten(), distlattice[0].flatten(), c = resols[1][0], vmin = 0, vmax = 0.2, s = 50)
 plt.axes().set_aspect('equal')
 plt.colorbar()
 plt.savefig("fig")
